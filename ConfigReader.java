@@ -7,6 +7,10 @@ import java.util.Map;
 public class ConfigReader {
     private Map<String, String> properties;
 
+    public ConfigReader(String filePath) throws IOException {
+            this.loadConfig(filePath);
+    }
+
     public void loadConfig(String filePath) throws IOException {
         properties = new HashMap<>();
         BufferedReader reader = new BufferedReader(new FileReader(filePath));
