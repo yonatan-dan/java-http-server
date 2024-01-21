@@ -20,10 +20,9 @@ public class Server {
      * initializes a new instance of the Server class
      */
     public Server() {
-
         try {
-            configReader = new ConfigReader("config.ini");
             //load configuration from config file
+            configReader = new ConfigReader("config.ini");
             int port = Integer.parseInt(configReader.getPort());
             int maxThreads = Integer.parseInt(configReader.getMaxThreads());
             // create a ServerSocket to listen on chosen port and a thread pool
