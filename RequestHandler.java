@@ -1,2 +1,2 @@
-public class RequestHandler {
+package PACKAGE_NAME;public class RequestHandler {
 }

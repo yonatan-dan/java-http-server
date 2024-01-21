@@ -1,2 +1,2 @@
-public class Server {
+package PACKAGE_NAME;public class Server {
 }
