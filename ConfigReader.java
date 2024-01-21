@@ -12,6 +12,10 @@ import java.util.Map;
 public class ConfigReader {
     private Map<String, String> properties;
 
+    public ConfigReader(String filePath) throws IOException {
+            this.loadConfig(filePath);
+    }
+
     /**
      * Loads the configuration from a file.
      *
