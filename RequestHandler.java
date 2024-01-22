@@ -10,6 +10,7 @@ public class RequestHandler {
 
     public RequestHandler(Socket clientSocket, ConfigReader configReader) {
         this.clientSocket = clientSocket;
+        this.configReader = configReader;
         responseBuilder = new ResponseBuilder();
     }
 
@@ -18,10 +19,23 @@ public class RequestHandler {
             BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             PrintWriter out = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
 
-            String request = in.readLine();
-            httpRequest = new HTTPRequest(request, configReader);
+            // read the entire request as a string
+            StringBuilder requestBuilder = new StringBuilder();
+            String line;
+            while (!(line = in.readLine()).isEmpty()) {
+                requestBuilder.append(line).append("\r\n");
+            }
+            String request = requestBuilder.toString();
+
+            httpRequest = new HTTPRequest(request, configReader.getImageExtensions());
 
             System.out.println(request);
+
+            if (!httpRequest.isValid()) {  // Check if the request is valid
+                out.println(responseBuilder.buildResponse(400, null, null));
+                out.flush();
+                return;
+            }
 
             String method = httpRequest.getType();
             if (!method.equals("GET") && !method.equals("POST")) {  // Only GET and POST are supported
@@ -38,13 +52,25 @@ public class RequestHandler {
             }
 
             String fileContent = readFileContent(filePath);
-            String response = responseBuilder.buildResponse(200, "html", fileContent);
+            String response;
+            if (httpRequest.isChunked()) {
+                response = responseBuilder.buildChunkedResponse(200, httpRequest.getContentType(), fileContent);
+            } else {
+                response = responseBuilder.buildResponse(200, httpRequest.getContentType(), fileContent);
+            }
 
             System.out.println(response.split("\r\n\r\n")[0]);  // Print the response header
             out.println(response);
             out.flush();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
+            try {
+                PrintWriter out = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
+                out.println(responseBuilder.buildResponse(500, null, null));
+                out.flush();
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
         }
     }
 
