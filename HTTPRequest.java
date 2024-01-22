@@ -15,14 +15,17 @@ public class HTTPRequest {
     private String userAgent;
     private Map<String, String> parameters;
 
+    private ConfigReader configReader;
+
     /**
      * Constructs an HTTPRequest object and parses the provided request header.
      *
      * @param requestHeader the HTTP request header to parse
      */
-    public HTTPRequest(String requestHeader) {
+    public HTTPRequest(String requestHeader, ConfigReader configReader) {
         parameters = new HashMap<>();
         String[] lines = requestHeader.split("\n");
+        this.configReader = configReader;
         try {
             for (String line : lines) {
                 parseTypeAndRequestedPage(line);
@@ -36,6 +39,15 @@ public class HTTPRequest {
     }
 
     /**
+     * Returns whether the request is valid.
+     *
+     * @return whether the request is valid
+     */
+    public boolean isValid() {
+        return type != null && !type.isEmpty() && requestedPage != null && !requestedPage.isEmpty();
+    }
+
+    /**
      * Parses the request type and requested page from a line of the request header.
      *
      * @param line a line of the request header
@@ -46,7 +58,16 @@ public class HTTPRequest {
             if (parts.length >= 2) {
                 type = parts[0];
                 requestedPage = parts[1];
-                isImage = requestedPage.endsWith(".jpg") || requestedPage.endsWith(".bmp") || requestedPage.endsWith(".gif");
+
+                // get allowed extensions from config file and check if requested page is an image
+                String[] allowedExtensions = configReader.getImageExtensions();
+                isImage = false;
+                for (String extension : allowedExtensions) {
+                    if (requestedPage.endsWith(extension)) {
+                        isImage = true;
+                        break;
+                    }
+                }
                 parseParameters(requestedPage);
             }
         }
