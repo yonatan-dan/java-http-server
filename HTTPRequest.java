@@ -78,7 +78,8 @@ public class HTTPRequest {
      * @param line a line of the request header
      */
     private void parseTypeAndRequestedPage(String line) {
-        if (line.startsWith("GET") || line.startsWith("POST")) {
+        if (line.startsWith("GET") || line.startsWith("POST") ||
+                line.startsWith("HEAD") || line.startsWith("TRACE")){
             String[] parts = line.split(" ");
             if (parts.length >= 2) {
                 type = parts[0];
