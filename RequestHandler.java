@@ -19,17 +19,7 @@ public class RequestHandler {
             BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             PrintWriter out = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
 
-            // read the entire request as a string
-            StringBuilder requestBuilder = new StringBuilder();
-            String line;
-            while (!(line = in.readLine()).isEmpty()) {
-                requestBuilder.append(line).append("\r\n");
-            }
-            String request = requestBuilder.toString();
-
-            httpRequest = new HTTPRequest(request, configReader.getImageExtensions());
-
-            System.out.println(request);
+            httpRequest = readRequestAndCreateHttpRequestInstance(in);
 
             if (!httpRequest.isValid()) {  // Check if the request is valid
                 out.println(responseBuilder.buildResponse(400, null, null));
@@ -89,5 +79,17 @@ public class RequestHandler {
             e.printStackTrace();
             return null;
         }
+    }
+
+    private HTTPRequest readRequestAndCreateHttpRequestInstance(BufferedReader in) throws IOException {
+        StringBuilder requestBuilder = new StringBuilder();
+        String line;
+        while (!(line = in.readLine()).isEmpty()) {
+            requestBuilder.append(line).append("\r\n");
+        }
+        String request = requestBuilder.toString();
+        // print only rhe request header
+        System.out.println(request.split("\r\n\r\n")[0]);
+        return new HTTPRequest(request, configReader.getImageExtensions());
     }
 }
