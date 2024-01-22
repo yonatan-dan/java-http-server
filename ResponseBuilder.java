@@ -37,7 +37,7 @@ public class ResponseBuilder {
 
     // default is head value is false . only when we get "HEAD" request type we change it to true
     public String buildResponse(int statusCode, String contentType, String content) {
-        return buildResponse(statusCode, contentType, content ,  false, false);
+        return buildResponse(statusCode, contentType, content , false, false);
     }
 
     public String buildResponse(int statusCode, String contentType, String content, Boolean isHead, Boolean isTrace) {
