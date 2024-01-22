@@ -33,15 +33,38 @@ public class ResponseBuilder {
      * @param content the content of the response
      * @return the constructed HTTP response
      */
+
+    // default is head value is false . only when we get "HEAD" request type we change it to true
     public String buildResponse(int statusCode, String contentType, String content) {
+        return buildResponse(statusCode, contentType, content ,  false, false);
+    }
+
+    public String buildResponse(int statusCode, String contentType, String content, Boolean isHead, Boolean isTrace) {
         StringBuilder response = new StringBuilder();
 
-        response.append(HTTP_VERSION).append(" ").append(statusCode).append(" ").append(STATUS_CODES.get(statusCode)).append(CRLF);
-        response.append("content-type: ").append(CONTENT_TYPES.getOrDefault(contentType, CONTENT_TYPES.get("default"))).append(CRLF);
-        response.append("content-length: ").append(content.length()).append(CRLF);
-        response.append(CRLF);
-        response.append(content);
+        response.append(HTTP_VERSION)
+                .append(" ").append(statusCode)
+                .append(" ")
+                .append(STATUS_CODES.get(statusCode))
+                .append(CRLF);
 
+        response.append("content-type: ")
+                .append(CONTENT_TYPES.getOrDefault(contentType, CONTENT_TYPES.get("default")))
+                .append(CRLF);
+
+        response.append("content-length: ")
+                .append(content.length())
+                .append(CRLF);
+
+        //if the request type != head , build the response with the body
+        if(!isHead) {
+            response.append(CRLF);
+            response.append(content);
+        }
+
+        if(isTrace){
+            //TODO - add the request ..
+        }
         return response.toString();
     }
 }

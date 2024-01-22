@@ -24,7 +24,8 @@ public class RequestHandler {
             System.out.println(request);
 
             String method = httpRequest.getType();
-            if (!method.equals("GET") && !method.equals("POST")) {  // Only GET and POST are supported
+            if (!method.equals("GET") && !method.equals("POST") &&
+                    !method.equals("HEAD") && !method.equals("TRACE")) {
                 out.println(responseBuilder.buildResponse(501, null, null));
                 out.flush();
                 return;
