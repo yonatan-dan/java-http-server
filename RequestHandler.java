@@ -9,12 +9,23 @@ public class RequestHandler {
     private ResponseBuilder responseBuilder;
     private Socket clientSocket;
 
+    /**
+     * Constructs a RequestHandler object.
+     *
+     * @param clientSocket the client socket
+     * @param configReader the ConfigReader object
+     * used to read the server configuration from a file
+     */
     public RequestHandler(Socket clientSocket, ConfigReader configReader) {
         this.clientSocket = clientSocket;
         this.configReader = configReader;
         responseBuilder = new ResponseBuilder();
     }
 
+    /**
+     * Handles the HTTP request.
+     * Reads the request header, parses it, and sends the appropriate response.
+     */
     public void handleRequest() {
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -43,6 +54,10 @@ public class RequestHandler {
             }
 
             String filePath = configReader.getRootDirectory() + sanitizePath(httpRequest.getRequestedPage());
+            if (httpRequest.getRequestedPage().equals("/")) { // handle default page
+                filePath += configReader.getDefaultPage();
+            }
+
             if (!Files.exists(Paths.get(filePath))) {
                 out.println(responseBuilder.buildResponse(404, null, null));
                 out.flush();
@@ -72,6 +87,13 @@ public class RequestHandler {
         }
     }
 
+    /**
+     * Sanitizes the path of the requested page.
+     * Removes all redundant characters from the path.
+     *
+     * @param path the path of the requested page
+     * @return the sanitized path
+     */
     private String sanitizePath(String path) {
         try {
             return Paths.get(path).normalize().toString();
@@ -80,6 +102,12 @@ public class RequestHandler {
         }
     }
 
+    /**
+     * Reads the content of a file.
+     *
+     * @param filePath the path to the file
+     * @return the content of the file
+     */
     private String readFileContent(String filePath) {
         try {
             return new String(Files.readAllBytes(Paths.get(filePath)));
@@ -89,6 +117,13 @@ public class RequestHandler {
         }
     }
 
+    /**
+     * Reads the request header and creates an HTTPRequest instance.
+     *
+     * @param in the BufferedReader object used to read the request header
+     * @return the HTTPRequest instance
+     * @throws IOException if an I/O error occurs
+     */
     private HTTPRequest readRequestAndCreateHttpRequestInstance(BufferedReader in) throws IOException {
         StringBuilder requestBuilder = new StringBuilder();
         String line;
@@ -101,6 +136,10 @@ public class RequestHandler {
         return new HTTPRequest(request, configReader.getImageExtensions());
     }
 
+    /**
+     * Handles a POST request to the /params_info.html page.
+     * @return the content of the response
+     */
     private String handleParamsInfoPostRequest() {
         Map<String, String> params = httpRequest.getParameters();
 

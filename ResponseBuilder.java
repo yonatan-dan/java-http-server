@@ -37,7 +37,7 @@ public class ResponseBuilder {
 
     // default is head value is false . only when we get "HEAD" request type we change it to true
     public String buildResponse(int statusCode, String contentType, String content) {
-        return buildResponse(statusCode, contentType, content , false, false, null);
+        return buildResponse(statusCode, contentType, content, false, false, null);
     }
 
     public String buildResponse(int statusCode, String contentType, String content,
@@ -59,12 +59,12 @@ public class ResponseBuilder {
                 .append(CRLF);
 
         // if the request type != head , build the response with the body
-        if(!isHead) {
+        if (!isHead) {
             response.append(CRLF);
             response.append(content);
         }
 
-        if(isTrace){
+        if (isTrace) {
             response.append("\n");
             response.append("");
             response.append(request); // TODO - check if its true
@@ -84,21 +84,33 @@ public class ResponseBuilder {
     public String buildChunkedResponse(int statusCode, String contentType, String content) {
         StringBuilder response = new StringBuilder();
 
-        response.append(HTTP_VERSION).append(" ").append(statusCode).append(" ").append(STATUS_CODES.get(statusCode)).append(CRLF);
-        response.append("content-type: ").append(CONTENT_TYPES.getOrDefault(contentType, CONTENT_TYPES.get("default"))).append(CRLF);
-        response.append("Transfer-Encoding: chunked").append(CRLF);
+        response.append(HTTP_VERSION)
+                .append(" ")
+                .append(statusCode)
+                .append(" ")
+                .append(STATUS_CODES.get(statusCode))
+                .append(CRLF);
+        response.append("content-type: ")
+                .append(CONTENT_TYPES.getOrDefault(contentType, CONTENT_TYPES.get("default")))
+                .append(CRLF);
+        response.append("Transfer-Encoding: chunked")
+                .append(CRLF);
         response.append(CRLF);
 
         int index = 0;
         while (index < content.length()) {
             int endIndex = Math.min(index + CHUNK_SIZE, content.length());
             String chunk = content.substring(index, endIndex);
-            response.append(Integer.toHexString(chunk.length())).append(CRLF);
-            response.append(chunk).append(CRLF);
+            response.append(Integer.toHexString(chunk.length()))
+                    .append(CRLF);
+            response.append(chunk)
+                    .append(CRLF);
             index = endIndex;
         }
 
-        response.append("0").append(CRLF).append(CRLF);  // End of chunks
+        response.append("0")
+                .append(CRLF)
+                .append(CRLF);  // End of chunks
 
         return response.toString();
     }
