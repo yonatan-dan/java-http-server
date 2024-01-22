@@ -7,44 +7,69 @@ import java.util.Map;
  * content length, referer, user agent, and parameters from the request header.
  */
 public class HTTPRequest {
+    private final String[] imageExtensions;
     private String type;
     private String requestedPage;
-    private boolean isImage;
+    private String contentType;
     private int contentLength;
     private String referer;
     private String userAgent;
+    private boolean chunked;
     private Map<String, String> parameters;
-
-    private ConfigReader configReader;
+    private boolean isValid;
 
     /**
      * Constructs an HTTPRequest object and parses the provided request header.
      *
      * @param requestHeader the HTTP request header to parse
      */
-    public HTTPRequest(String requestHeader, ConfigReader configReader) {
+    public HTTPRequest(String requestHeader, String[] imgExtensions) {
         parameters = new HashMap<>();
         String[] lines = requestHeader.split("\n");
-        this.configReader = configReader;
+        imageExtensions = imgExtensions;
+        isValid = true;
         try {
             for (String line : lines) {
                 parseTypeAndRequestedPage(line);
                 parseContentLength(line);
                 parseReferer(line);
                 parseUserAgent(line);
+                parseChunked(line);
             }
+            determineContentType();
         } catch (Exception e) {
             System.out.println("Error parsing request header: " + e.getMessage());
+            isValid = false;
+
         }
     }
 
     /**
-     * Returns whether the request is valid.
-     *
-     * @return whether the request is valid
+     * Determines the content type of the requested page.
+     * The content type is determined by the extension of the requested page.
      */
-    public boolean isValid() {
-        return type != null && !type.isEmpty() && requestedPage != null && !requestedPage.isEmpty();
+    private void determineContentType() {
+        String[] parts = requestedPage.split("\\.");
+        String extension = parts[parts.length - 1];
+
+        for (String imageExtension : imageExtensions) {
+            if (imageExtension.equals(extension)) {
+                contentType = "image";
+                return;
+            }
+        }
+
+        if (extension.equals("html")) {
+            contentType = "html";
+            return;
+        }
+
+        if (extension.equals("ico")) {
+            contentType = "icon";
+            return;
+        }
+
+        contentType = "default";
     }
 
     /**
@@ -58,16 +83,6 @@ public class HTTPRequest {
             if (parts.length >= 2) {
                 type = parts[0];
                 requestedPage = parts[1];
-
-                // get allowed extensions from config file and check if requested page is an image
-                String[] allowedExtensions = configReader.getImageExtensions();
-                isImage = false;
-                for (String extension : allowedExtensions) {
-                    if (requestedPage.endsWith(extension)) {
-                        isImage = true;
-                        break;
-                    }
-                }
                 parseParameters(requestedPage);
             }
         }
@@ -129,6 +144,17 @@ public class HTTPRequest {
         }
     }
 
+    /**
+     * Parses the chunked from a line of the request header.
+     *
+     * @param line a line of the request header
+     */
+    private void parseChunked(String line) {
+        if (line.toLowerCase().startsWith("chunked: ")) {
+            chunked = "yes".equals(line.split(": ")[1].trim().toLowerCase());
+        }
+    }
+
     // Getters
 
     /**
@@ -151,12 +177,11 @@ public class HTTPRequest {
     }
 
     /**
-     * Returns whether the requested page is an image.
-     *
-     * @return whether the requested page is an image
+     * Returns the content type.
+     * @return the content type
      */
-    public boolean isImage() {
-        return isImage;
+    public String getContentType() {
+        return contentType;
     }
 
     /**
@@ -184,5 +209,29 @@ public class HTTPRequest {
      */
     public String getUserAgent() {
         return userAgent;
+    }
+
+    /**
+     * Returns whether the request is valid.
+     * @return whether the request is valid
+     */
+    public boolean isValid() {
+        return isValid;
+    }
+
+    /**
+     * Returns the parameters.
+     * @return the parameters
+     */
+    public Map<String, String> getParameters() {
+        return parameters;
+    }
+
+    /**
+     * Returns whether the request is chunked.
+     * @return whether the request is chunked
+     */
+    public boolean isChunked() {
+        return chunked;
     }
 }
