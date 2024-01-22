@@ -37,7 +37,7 @@ public class ResponseBuilder {
 
     // default is head value is false . only when we get "HEAD" request type we change it to true
     public String buildResponse(int statusCode, String contentType, String content) {
-        return buildResponse(statusCode, contentType, content ,  false, false, null);
+        return buildResponse(statusCode, contentType, content , false, false, null);
     }
 
     public String buildResponse(int statusCode, String contentType, String content,
@@ -69,7 +69,6 @@ public class ResponseBuilder {
             response.append("");
             response.append(request); // TODO - check if its true
         }
-
         return response.toString();
     }
 
