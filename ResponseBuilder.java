@@ -37,10 +37,11 @@ public class ResponseBuilder {
 
     // default is head value is false . only when we get "HEAD" request type we change it to true
     public String buildResponse(int statusCode, String contentType, String content) {
-        return buildResponse(statusCode, contentType, content ,  false, false);
+        return buildResponse(statusCode, contentType, content ,  false, false, null);
     }
 
-    public String buildResponse(int statusCode, String contentType, String content, Boolean isHead, Boolean isTrace) {
+    public String buildResponse(int statusCode, String contentType, String content,
+                                Boolean isHead, Boolean isTrace, String request) {
         StringBuilder response = new StringBuilder();
 
         response.append(HTTP_VERSION)
@@ -57,15 +58,18 @@ public class ResponseBuilder {
                 .append(content.length())
                 .append(CRLF);
 
-        //if the request type != head , build the response with the body
+        // if the request type != head , build the response with the body
         if(!isHead) {
             response.append(CRLF);
             response.append(content);
         }
 
         if(isTrace){
-            //TODO - add the request ..
+            response.append("\n");
+            response.append("");
+            response.append(request); // TODO - check if its true
         }
+
         return response.toString();
     }
 
