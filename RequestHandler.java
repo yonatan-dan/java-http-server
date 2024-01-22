@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.Socket;
 import java.nio.file.*;
+import java.util.Map;
 
 public class RequestHandler {
     private ConfigReader configReader;
@@ -28,9 +29,16 @@ public class RequestHandler {
             }
 
             String method = httpRequest.getType();
-            if (!method.equals("GET") && !method.equals("POST")) {  // Only GET and POST are supported
+            if (!method.equals("GET") && !method.equals("POST") &&
+                    !method.equals("HEAD") && !method.equals("TRACE")) {
                 out.println(responseBuilder.buildResponse(501, null, null));
                 out.flush();
+                return;
+            }
+
+            if (method.equals("POST") && httpRequest.getRequestedPage().equals("/params_info.html")) {
+                String content = handleParamsInfoPostRequest();
+                String response = responseBuilder.buildResponse(200, httpRequest.getContentType(), content);
                 return;
             }
 
@@ -91,5 +99,16 @@ public class RequestHandler {
         // print only rhe request header
         System.out.println(request.split("\r\n\r\n")[0]);
         return new HTTPRequest(request, configReader.getImageExtensions());
+    }
+
+    private String handleParamsInfoPostRequest() {
+        Map<String, String> params = httpRequest.getParameters();
+
+        StringBuilder content = new StringBuilder("<html><body>");
+        for (Map.Entry<String, String> entry : params.entrySet()) {
+            content.append("<p>").append(entry.getKey()).append(": ").append(entry.getValue()).append("</p>");
+        }
+        content.append("</body></html>");
+        return content.toString();
     }
 }
