@@ -1,4 +1,5 @@
 import java.util.Map;
+import java.nio.charset.StandardCharsets;
 
 /**
  * The ResponseBuilder class is responsible for building HTTP responses.
@@ -35,12 +36,39 @@ public class ResponseBuilder {
      * @return the constructed HTTP response
      */
 
-    // default is head value is false . only when we get "HEAD" request type we change it to true
-    public String buildResponse(int statusCode, String contentType, String content) {
-        return buildResponse(statusCode, contentType, content, false, false, null);
+    /**
+     * Handles an HTTP response using the given status code, content type, and content.
+     * @param statusCode  the status code of the response
+     * @param contentType  the content type of the response
+     * @param content   the content of the response
+     * @param requestType  the type of the request
+     * @param request   the content of the response
+     * @return the constructed HTTP response
+     */
+    public String handleResponse(int statusCode, String contentType, String content, String requestType, String request) {
+        Boolean isHead = requestType.equals("HEAD");
+        Boolean isTrace = requestType.equals("TRACE");
+
+        return buildResponse(statusCode, contentType, content, isHead, isTrace, request);
     }
 
-    public String buildResponse(int statusCode, String contentType, String content,
+    /**
+     * Handles an HTTP response using the given status code, content type, and content.
+     * @param statusCode  the status code of the response
+     * @param contentType  the content type of the response
+     * @param contentBytes   the content of the response
+     * @param requestType  the type of the request
+     * @param request   the content of the response
+     * @return the constructed HTTP response
+     */
+    public String handleResponse(int statusCode, String contentType, byte[] contentBytes, String requestType, String request) {
+        Boolean isHead = requestType.equals("HEAD");
+        Boolean isTrace = requestType.equals("TRACE");
+        String content = new String(contentBytes, StandardCharsets.UTF_8);
+        return buildResponse(statusCode, contentType, content, isHead, isTrace, request);
+    }
+
+    private String buildResponse(int statusCode, String contentType, String content,
                                 Boolean isHead, Boolean isTrace, String request) {
         StringBuilder response = new StringBuilder();
 
@@ -59,15 +87,14 @@ public class ResponseBuilder {
                 .append(CRLF);
 
         // if the request type != head , build the response with the body
-        if (!isHead) {
+        if (!isHead && !isTrace) {
             response.append(CRLF);
             response.append(content);
         }
 
         if (isTrace) {
             response.append("\n");
-            response.append("");
-            response.append(request); // TODO - check if its true
+            response.append(request);
         }
         return response.toString();
     }

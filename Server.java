@@ -16,6 +16,11 @@ public class Server {
     private ExecutorService executorService;
     private Semaphore semaphore;
 
+    public static void main(String[] args) {
+        Server server = new Server();
+        server.start();
+    }
+
     /**
      * Initializes a new instance of the Server class.
      * Sets up the server socket, thread pool, and semaphore.

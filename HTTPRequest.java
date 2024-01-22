@@ -85,6 +85,9 @@ public class HTTPRequest {
                 type = parts[0];
                 requestedPage = parts[1];
                 parseParameters(requestedPage);
+                if (this.requestedPage.equals("/")) { // handle default page
+                    requestedPage = "/index.html";
+                }
             }
         }
     }
