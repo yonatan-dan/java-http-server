@@ -20,11 +20,9 @@ public class Server {
      * initializes a new instance of the Server class
      */
     public Server() {
-        configReader = new ConfigReader();
-
         try {
             //load configuration from config file
-            configReader.loadConfig("config.ini");
+            configReader = new ConfigReader("config.ini");
             int port = Integer.parseInt(configReader.getPort());
             int maxThreads = Integer.parseInt(configReader.getMaxThreads());
             // create a ServerSocket to listen on chosen port and a thread pool
@@ -51,7 +49,7 @@ public class Server {
                 if (currentThreads < 10) {
                     CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
                         currentThreads++;
-                        RequestHandler.handleRequest(clientSocket);
+                        new RequestHandler(clientSocket, configReader).handleRequest();
                     }, executorService);
 
                     // print a callback to release the thread when the CompletableFuture is completed
