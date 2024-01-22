@@ -29,9 +29,9 @@ public class ResponseBuilder {
     /**
      * Builds an HTTP response using the given status code, content type, and content.
      *
-     * @param statusCode the status code of the response
+     * @param statusCode  the status code of the response
      * @param contentType the content type of the response
-     * @param content the content of the response
+     * @param content     the content of the response
      * @return the constructed HTTP response
      */
     public String buildResponse(int statusCode, String contentType, String content) {
@@ -50,9 +50,9 @@ public class ResponseBuilder {
      * Builds an HTTP response using the given status code, content type, and content.
      * The response is sent in chunks of size CHUNK_SIZE.
      *
-     * @param statusCode the status code of the response
+     * @param statusCode  the status code of the response
      * @param contentType the content type of the response
-     * @param content the content of the response
+     * @param content     the content of the response
      * @return the constructed HTTP response
      */
     public String buildChunkedResponse(int statusCode, String contentType, String content) {
