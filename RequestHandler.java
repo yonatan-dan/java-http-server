@@ -12,6 +12,10 @@ public class RequestHandler {
     private Socket clientSocket;
     private String requestHeaders;
     private static final String DEFAULT_CONTENT_TYPE = "default";
+    private static final String HTTP_GET = "GET";
+    private static final String HTTP_POST = "POST";
+    private static final String HTTP_HEAD = "HEAD";
+    private static final String HTTP_TRACE = "TRACE";
 
     /**
      * Constructs a RequestHandler object.
@@ -45,8 +49,8 @@ public class RequestHandler {
             }
 
             String method = httpRequest.getType();
-            if (!method.equals("GET") && !method.equals("POST") &&
-                    !method.equals("HEAD") && !method.equals("TRACE")) {
+            if (!method.equals(HTTP_GET) && !method.equals(HTTP_POST) &&
+                    !method.equals(HTTP_HEAD) && !method.equals(HTTP_TRACE)) {
                 responseBuilder.handleResponse(
                         501, DEFAULT_CONTENT_TYPE, new byte[0], httpRequest.getType(), outputStream, requestHeaders
                 );
@@ -104,7 +108,7 @@ public class RequestHandler {
         try {
             return Paths.get(path).normalize().toString();
         } catch (InvalidPathException e) {
-            return null;
+            return "";
         }
     }
 
