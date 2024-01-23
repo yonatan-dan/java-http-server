@@ -57,7 +57,7 @@ public class RequestHandler {
                 return;
             }
 
-            if (method.equals("POST") && httpRequest.getRequestedPage().equals("/params_info.html")) {
+            if (method.equals(HTTP_POST) && httpRequest.getRequestedPage().equals("/params_info.html")) {
                 String content = handleParamsInfoPostRequest();
                 responseBuilder.handleResponse(
                         200, httpRequest.getContentType(), content.getBytes(), httpRequest.getType(), outputStream, requestHeaders

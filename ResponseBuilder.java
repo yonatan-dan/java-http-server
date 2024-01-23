@@ -29,6 +29,20 @@ public class ResponseBuilder {
             "default", "application/octet-stream"
     );
 
+    /**
+     * Handles the HTTP response.
+     * Constructs the response headers and writes them to the output stream.
+     * If the request type is not HEAD, it also writes the content bytes to the output stream.
+     * If the request type is TRACE, it appends the request to the output stream.
+     *
+     * @param statusCode the status code of the response
+     * @param contentType the content type of the response
+     * @param contentBytes the content of the response in bytes
+     * @param requestType the type of the HTTP request
+     * @param outputStream the output stream to write the response to
+     * @param request the original HTTP request
+     * @throws IOException if an I/O error occurs
+     */
     public void handleResponse(int statusCode, String contentType, byte[] contentBytes,
                                String requestType, OutputStream outputStream, String request) throws IOException {
         Boolean isHead = requestType.equals("HEAD");
@@ -45,8 +59,9 @@ public class ResponseBuilder {
         responseHeaders.append("Connection: close").append(CRLF);
         responseHeaders.append(CRLF);
 
-        // Write headers
         outputStream.write(responseHeaders.toString().getBytes(StandardCharsets.UTF_8));
+
+        System.out.println(responseHeaders.toString());
 
         // Write body if not a HEAD request
         if (!isHead) {
@@ -58,13 +73,20 @@ public class ResponseBuilder {
             outputStream.write(("\n" + request).getBytes(StandardCharsets.UTF_8));
         }
 
-        // print the response to the console
-        System.out.println(responseHeaders.toString());
-
         outputStream.flush();
     }
 
-    // Method to handle chunked response
+    /**
+     * Handles the HTTP response with chunked transfer encoding.
+     * Constructs the response headers and writes them to the output stream.
+     * Then writes the content bytes to the output stream in chunks.
+     *
+     * @param statusCode the status code of the response
+     * @param contentType the content type of the response
+     * @param contentBytes the content of the response in bytes
+     * @param outputStream the output stream to write the response to
+     * @throws IOException if an I/O error occurs
+     */
     public void handleChunkedResponse(int statusCode, String contentType, byte[] contentBytes,
                                       OutputStream outputStream) throws IOException {
         StringBuilder responseHeaders = new StringBuilder();
@@ -77,10 +99,8 @@ public class ResponseBuilder {
         responseHeaders.append("Connection: close").append(CRLF);
         responseHeaders.append(CRLF);
 
-        // Write headers
         outputStream.write(responseHeaders.toString().getBytes(StandardCharsets.UTF_8));
 
-        // print the response to the console
         System.out.println(responseHeaders.toString());
 
         int index = 0;
@@ -89,11 +109,9 @@ public class ResponseBuilder {
             byte[] chunk = new byte[chunkSize];
             System.arraycopy(contentBytes, index, chunk, 0, chunkSize);
 
-            // Write chunk size in hex
             outputStream.write(Integer.toHexString(chunkSize).getBytes(StandardCharsets.UTF_8));
             outputStream.write(CRLF.getBytes(StandardCharsets.UTF_8));
 
-            // Write chunk
             outputStream.write(chunk);
             outputStream.write(CRLF.getBytes(StandardCharsets.UTF_8));
 
