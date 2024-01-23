@@ -52,7 +52,7 @@ public class ConfigReader {
      * @return the root directory
      */
     public String getRootDirectory() {
-        return properties.get("rootDirectory");
+        return properties.get("root");
     }
 
     /**
