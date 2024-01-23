@@ -1,3 +1,5 @@
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Map;
 import java.nio.charset.StandardCharsets;
 
@@ -27,118 +29,82 @@ public class ResponseBuilder {
             "default", "application/octet-stream"
     );
 
-    /**
-     * Builds an HTTP response using the given status code, content type, and content.
-     *
-     * @param statusCode  the status code of the response
-     * @param contentType the content type of the response
-     * @param content     the content of the response
-     * @return the constructed HTTP response
-     */
-
-    /**
-     * Handles an HTTP response using the given status code, content type, and content.
-     * @param statusCode  the status code of the response
-     * @param contentType  the content type of the response
-     * @param content   the content of the response
-     * @param requestType  the type of the request
-     * @param request   the content of the response
-     * @return the constructed HTTP response
-     */
-    public String handleResponse(int statusCode, String contentType, String content, String requestType, String request) {
+    public void handleResponse(int statusCode, String contentType, byte[] contentBytes,
+                               String requestType, OutputStream outputStream, String request) throws IOException {
         Boolean isHead = requestType.equals("HEAD");
         Boolean isTrace = requestType.equals("TRACE");
 
-        return buildResponse(statusCode, contentType, content, isHead, isTrace, request);
-    }
-
-    /**
-     * Handles an HTTP response using the given status code, content type, and content.
-     * @param statusCode  the status code of the response
-     * @param contentType  the content type of the response
-     * @param contentBytes   the content of the response
-     * @param requestType  the type of the request
-     * @param request   the content of the response
-     * @return the constructed HTTP response
-     */
-    public String handleResponse(int statusCode, String contentType, byte[] contentBytes, String requestType, String request) {
-        Boolean isHead = requestType.equals("HEAD");
-        Boolean isTrace = requestType.equals("TRACE");
-        String content = new String(contentBytes, StandardCharsets.UTF_8);
-        return buildResponse(statusCode, contentType, content, isHead, isTrace, request);
-    }
-
-    private String buildResponse(int statusCode, String contentType, String content,
-                                Boolean isHead, Boolean isTrace, String request) {
-        StringBuilder response = new StringBuilder();
-
-        response.append(HTTP_VERSION)
-                .append(" ").append(statusCode)
-                .append(" ")
-                .append(STATUS_CODES.get(statusCode))
-                .append(CRLF);
-
-        response.append("content-type: ")
+        // Build the header
+        StringBuilder responseHeaders = new StringBuilder();
+        responseHeaders.append(HTTP_VERSION).append(" ").append(statusCode).append(" ")
+                .append(STATUS_CODES.get(statusCode)).append(CRLF);
+        responseHeaders.append("Content-Type: ")
                 .append(CONTENT_TYPES.getOrDefault(contentType, CONTENT_TYPES.get("default")))
                 .append(CRLF);
+        responseHeaders.append("Content-Length: ").append(contentBytes.length).append(CRLF);
+        responseHeaders.append("Connection: close").append(CRLF);
+        responseHeaders.append(CRLF);
 
-        response.append("content-length: ")
-                .append(content.length())
-                .append(CRLF);
+        // Write headers
+        outputStream.write(responseHeaders.toString().getBytes(StandardCharsets.UTF_8));
 
-        // if the request type != head , build the response with the body
-        if (!isHead && !isTrace) {
-            response.append(CRLF);
-            response.append(content);
+        // Write body if not a HEAD request
+        if (!isHead) {
+            outputStream.write(contentBytes);
         }
 
+        // Special handling for TRACE
         if (isTrace) {
-            response.append("\n");
-            response.append(request);
+            outputStream.write(("\n" + request).getBytes(StandardCharsets.UTF_8));
         }
-        return response.toString();
+
+        // print the response to the console
+        System.out.println(responseHeaders.toString());
+
+        outputStream.flush();
     }
 
-    /**
-     * Builds an HTTP response using the given status code, content type, and content.
-     * The response is sent in chunks of size CHUNK_SIZE.
-     *
-     * @param statusCode  the status code of the response
-     * @param contentType the content type of the response
-     * @param content     the content of the response
-     * @return the constructed HTTP response
-     */
-    public String buildChunkedResponse(int statusCode, String contentType, String content) {
-        StringBuilder response = new StringBuilder();
-
-        response.append(HTTP_VERSION)
-                .append(" ")
-                .append(statusCode)
-                .append(" ")
-                .append(STATUS_CODES.get(statusCode))
-                .append(CRLF);
-        response.append("content-type: ")
+    // Method to handle chunked response
+    public void handleChunkedResponse(int statusCode, String contentType, byte[] contentBytes,
+                                      OutputStream outputStream) throws IOException {
+        StringBuilder responseHeaders = new StringBuilder();
+        responseHeaders.append(HTTP_VERSION).append(" ").append(statusCode).append(" ")
+                .append(STATUS_CODES.get(statusCode)).append(CRLF);
+        responseHeaders.append("Content-Type: ")
                 .append(CONTENT_TYPES.getOrDefault(contentType, CONTENT_TYPES.get("default")))
                 .append(CRLF);
-        response.append("Transfer-Encoding: chunked")
-                .append(CRLF);
-        response.append(CRLF);
+        responseHeaders.append("Transfer-Encoding: chunked").append(CRLF);
+        responseHeaders.append("Connection: close").append(CRLF);
+        responseHeaders.append(CRLF);
+
+        // Write headers
+        outputStream.write(responseHeaders.toString().getBytes(StandardCharsets.UTF_8));
+
+        // print the response to the console
+        System.out.println(responseHeaders.toString());
 
         int index = 0;
-        while (index < content.length()) {
-            int endIndex = Math.min(index + CHUNK_SIZE, content.length());
-            String chunk = content.substring(index, endIndex);
-            response.append(Integer.toHexString(chunk.length()))
-                    .append(CRLF);
-            response.append(chunk)
-                    .append(CRLF);
-            index = endIndex;
+        while (index < contentBytes.length) {
+            int chunkSize = Math.min(CHUNK_SIZE, contentBytes.length - index);
+            byte[] chunk = new byte[chunkSize];
+            System.arraycopy(contentBytes, index, chunk, 0, chunkSize);
+
+            // Write chunk size in hex
+            outputStream.write(Integer.toHexString(chunkSize).getBytes(StandardCharsets.UTF_8));
+            outputStream.write(CRLF.getBytes(StandardCharsets.UTF_8));
+
+            // Write chunk
+            outputStream.write(chunk);
+            outputStream.write(CRLF.getBytes(StandardCharsets.UTF_8));
+
+            index += chunkSize;
         }
 
-        response.append("0")
-                .append(CRLF)
-                .append(CRLF);  // End of chunks
+        // End of chunks
+        outputStream.write("0".getBytes(StandardCharsets.UTF_8));
+        outputStream.write(CRLF.getBytes(StandardCharsets.UTF_8));
+        outputStream.write(CRLF.getBytes(StandardCharsets.UTF_8));
 
-        return response.toString();
+        outputStream.flush();
     }
 }
