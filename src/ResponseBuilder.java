@@ -1,10 +1,12 @@
+package src;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
 import java.nio.charset.StandardCharsets;
 
 /**
- * The ResponseBuilder class is responsible for building HTTP responses.
+ * The src.ResponseBuilder class is responsible for building HTTP responses.
  * It uses predefined status codes and content types to construct the response.
  */
 public class ResponseBuilder {
@@ -18,7 +20,7 @@ public class ResponseBuilder {
             404, "Not Found",
             501, "Not Implemented",
             400, "Bad Request",
-            500, "Internal Server Error"
+            500, "Internal src.Server Error"
     );
 
     // Map of content types to their corresponding values

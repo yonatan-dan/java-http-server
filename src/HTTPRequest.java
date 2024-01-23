@@ -1,10 +1,12 @@
+package src;
+
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * The HTTPRequest class is responsible for parsing an HTTP request header.
+ * The src.HTTPRequest class is responsible for parsing an HTTP request header.
  * It extracts the request type, requested page, whether the requested page is an image,
  * content length, referer, user agent, and parameters from the request header.
  */
@@ -22,7 +24,7 @@ public class HTTPRequest {
     private Map<String, String> requestBody;
 
     /**
-     * Constructs an HTTPRequest object and parses the provided request header.
+     * Constructs an src.HTTPRequest object and parses the provided request header.
      *
      * @param requestHeader the HTTP request header to parse
      */

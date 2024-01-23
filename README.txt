@@ -1,4 +1,4 @@
-Web Server README
+Web src.Server README
 Overview
 This is a multi-threaded web server implemented in Java as part of the Computer Networks Lab at Reichman University. The goal of the project is to build a web server that supports various HTTP methods, handles different types of HTTP responses, and ensures proper configuration through a config.ini file.
 
@@ -6,7 +6,7 @@ Major Milestones
 Config.ini File:
 
 Port: 8080
-Root directory: ~/www/lab/html/
+Root directory: server-root
 Default page: index.html
 Max threads: 10
 HTTP Response Codes:
@@ -15,7 +15,7 @@ HTTP Response Codes:
 404 Not Found
 501 Not Implemented
 400 Bad Request
-500 Internal Server Error
+500 Internal src.Server Error
 Content Types:
 
 HTML: "content-type: text/html"
@@ -65,7 +65,7 @@ src: Contains all Java source files.
 config.ini: Configuration file for the server.
 compile.sh: Bash script to compile the code.
 run.sh: Bash script to run the server.
-www/lab/html/: Root directory for the web server.
+server-root: Root directory for the web server.
 Contributors
 Yonatan Dan
 Maya Levi

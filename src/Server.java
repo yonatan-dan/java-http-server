@@ -1,3 +1,5 @@
+package src;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -7,7 +9,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 
 /**
- * The Server class represents a server that listens for incoming client connections
+ * The src.Server class represents a server that listens for incoming client connections
  * and handles them efficiently using a thread pool and a Semaphore to limit the number of concurrent connections.
  */
 public class Server {
@@ -22,7 +24,7 @@ public class Server {
     }
 
     /**
-     * Initializes a new instance of the Server class.
+     * Initializes a new instance of the src.Server class.
      * Sets up the server socket, thread pool, and semaphore.
      */
     public Server() {
@@ -43,7 +45,7 @@ public class Server {
      * Starts the server, listening for incoming client connections and handling them
      * using a thread pool with a fixed size of threads.
      * The server will continuously accept incoming connections and assign a separate thread
-     * (RequestHandler) to handle each connection (until it gets to maximum thread number).
+     * (src.RequestHandler) to handle each connection (until it gets to maximum thread number).
      * If the maximum number of threads is reached, the server will wait until a thread is available.
      */
     public void start() {
