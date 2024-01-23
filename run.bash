@@ -1,1 +1,1 @@
-java Server
+java src.Server

@@ -1,8 +1,10 @@
+package src;
+
 import java.io.*;
 import java.net.Socket;
-import java.net.StandardSocketOptions;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Paths;
 import java.util.Map;
 
 public class RequestHandler {
@@ -18,10 +20,10 @@ public class RequestHandler {
     private static final String HTTP_TRACE = "TRACE";
 
     /**
-     * Constructs a RequestHandler object.
+     * Constructs a src.RequestHandler object.
      *
      * @param clientSocket the client socket
-     * @param configReader the ConfigReader object
+     * @param configReader the src.ConfigReader object
      * used to read the server configuration from a file
      */
     public RequestHandler(Socket clientSocket, ConfigReader configReader) {
@@ -41,7 +43,7 @@ public class RequestHandler {
 
             httpRequest = readRequestAndCreateHttpRequestInstance(in);
 
-            if (!httpRequest.isValid()) {  // Check if the request is valid
+            if (!httpRequest.isValid()) {  // handle invalid request
                 responseBuilder.handleResponse(
                         400, DEFAULT_CONTENT_TYPE, new byte[0], httpRequest.getType(), outputStream, requestHeaders
                 );
@@ -50,14 +52,14 @@ public class RequestHandler {
 
             String method = httpRequest.getType();
             if (!method.equals(HTTP_GET) && !method.equals(HTTP_POST) &&
-                    !method.equals(HTTP_HEAD) && !method.equals(HTTP_TRACE)) {
+                    !method.equals(HTTP_HEAD) && !method.equals(HTTP_TRACE)) { // handle not implemented request
                 responseBuilder.handleResponse(
                         501, DEFAULT_CONTENT_TYPE, new byte[0], httpRequest.getType(), outputStream, requestHeaders
                 );
                 return;
             }
 
-            if (method.equals(HTTP_POST) && httpRequest.getRequestedPage().equals("/params_info.html")) {
+            if (method.equals(HTTP_POST) && httpRequest.getRequestedPage().equals("/params_info.html")) { // handle params_info.html POST request
                 String content = handleParamsInfoPostRequest();
                 responseBuilder.handleResponse(
                         200, httpRequest.getContentType(), content.getBytes(), httpRequest.getType(), outputStream, requestHeaders
@@ -66,7 +68,7 @@ public class RequestHandler {
             }
 
             String filePath = configReader.getRootDirectory() + sanitizePath(httpRequest.getRequestedPage());
-            if (!Files.exists(Paths.get(filePath))) {
+            if (!Files.exists(Paths.get(filePath))) { // handle not found request
                 responseBuilder.handleResponse(
                         404, DEFAULT_CONTENT_TYPE, new byte[0], httpRequest.getType(), outputStream, requestHeaders
                 );
@@ -74,11 +76,11 @@ public class RequestHandler {
             }
 
             byte[] fileContent = readFileContent(filePath);
-            if (httpRequest.isChunked()) {
+            if (httpRequest.isChunked()) { // handle chunked response
                 responseBuilder.handleChunkedResponse(
                         200, httpRequest.getContentType(), fileContent, outputStream
                 );
-            } else {
+            } else { // handle normal response
                 responseBuilder.handleResponse(
                         200, httpRequest.getContentType(), fileContent, httpRequest.getType(), outputStream, requestHeaders
                 );
@@ -128,10 +130,10 @@ public class RequestHandler {
     }
 
     /**
-     * Reads the request header and creates an HTTPRequest instance.
+     * Reads the request header and creates an src.HTTPRequest instance.
      *
      * @param in the BufferedReader object used to read the request header
-     * @return the HTTPRequest instance
+     * @return the src.HTTPRequest instance
      * @throws IOException if an I/O error occurs
      */
     private HTTPRequest readRequestAndCreateHttpRequestInstance(BufferedReader in) throws IOException {
