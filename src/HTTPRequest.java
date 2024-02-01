@@ -1,8 +1,12 @@
+package src;
+
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * The HTTPRequest class is responsible for parsing an HTTP request header.
+ * The src.HTTPRequest class is responsible for parsing an HTTP request header.
  * It extracts the request type, requested page, whether the requested page is an image,
  * content length, referer, user agent, and parameters from the request header.
  */
@@ -11,23 +15,25 @@ public class HTTPRequest {
     private String type;
     private String requestedPage;
     private String contentType;
-    private int contentLength;
     private String referer;
     private String userAgent;
     private boolean chunked;
-    private Map<String, String> parameters;
     private boolean isValid;
+    private int contentLength;
+    private Map<String, String> parameters;
+    private Map<String, String> requestBody;
 
     /**
-     * Constructs an HTTPRequest object and parses the provided request header.
+     * Constructs an src.HTTPRequest object and parses the provided request header.
      *
      * @param requestHeader the HTTP request header to parse
      */
-    public HTTPRequest(String requestHeader, String[] imgExtensions) {
+    public HTTPRequest(String requestHeader, String[] imgExtensions, String body) {
         parameters = new HashMap<>();
+        requestBody = new HashMap<>();
         String[] lines = requestHeader.split("\n");
         imageExtensions = imgExtensions;
-        isValid = true;
+        isValid = true; // assume the request is valid until proven otherwise
         try {
             for (String line : lines) {
                 parseTypeAndRequestedPage(line);
@@ -37,6 +43,7 @@ public class HTTPRequest {
                 parseChunked(line);
             }
             determineContentType();
+            parseBody(body);
         } catch (Exception e) {
             System.out.println("Error parsing request header: " + e.getMessage());
             isValid = false;
@@ -85,6 +92,9 @@ public class HTTPRequest {
                 type = parts[0];
                 requestedPage = parts[1];
                 parseParameters(requestedPage);
+                if (this.requestedPage.equals("/")) { // handle default page
+                    requestedPage = "/index.html";
+                }
             }
         }
     }
@@ -153,6 +163,21 @@ public class HTTPRequest {
     private void parseChunked(String line) {
         if (line.toLowerCase().startsWith("chunked: ")) {
             chunked = "yes".equals(line.split(": ")[1].trim().toLowerCase());
+        }
+    }
+
+    /**
+     * Parses the body from a line of the request header.
+     *
+     * @param body a line of the request header
+     */
+    private void parseBody(String body) throws Exception {
+        String[] pairs = body.split("&");
+        for (String pair : pairs) {
+            String[] parts = pair.split("=");
+            String name = parts[0];
+            String value = parts.length > 1 ? URLDecoder.decode(parts[1], StandardCharsets.UTF_8) : "";
+            requestBody.put(name, value);
         }
     }
 
@@ -234,5 +259,13 @@ public class HTTPRequest {
      */
     public boolean isChunked() {
         return chunked;
+    }
+
+    /**
+     * Returns the request body.
+     * @return the request body
+     */
+    public Map<String, String> getRequestFormBody() {
+        return requestBody;
     }
 }

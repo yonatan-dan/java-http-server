@@ -1,3 +1,5 @@
+package src;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -5,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * The ConfigReader class is responsible for reading the server configuration from a file.
+ * The src.ConfigReader class is responsible for reading the server configuration from a file.
  * The configuration includes the server port, root directory, default page, maximum number of threads, and image extensions.
  * The configuration is stored in a Map, with the configuration name as the key and the configuration value as the value.
  */
@@ -52,7 +54,7 @@ public class ConfigReader {
      * @return the root directory
      */
     public String getRootDirectory() {
-        return properties.get("rootDirectory");
+        return properties.get("root");
     }
 
     /**
