@@ -17,6 +17,8 @@ public class Server {
     private ServerSocket serverSocket;
     private ExecutorService executorService;
     private Semaphore semaphore;
+    private static final String CONFIG_INI = "config.ini";
+
 
     public static void main(String[] args) {
         Server server = new Server();
@@ -29,7 +31,7 @@ public class Server {
      */
     public Server() {
         try {
-            configReader = new ConfigReader("config.ini");
+            configReader = new ConfigReader(CONFIG_INI);
             int port = Integer.parseInt(configReader.getPort());
             int maxThreads = Integer.parseInt(configReader.getMaxThreads());
             serverSocket = new ServerSocket(port);

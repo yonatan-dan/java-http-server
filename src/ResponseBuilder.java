@@ -52,18 +52,30 @@ public class ResponseBuilder {
 
         // Build the header
         StringBuilder responseHeaders = new StringBuilder();
-        responseHeaders.append(HTTP_VERSION).append(" ").append(statusCode).append(" ")
-                .append(STATUS_CODES.get(statusCode)).append(CRLF);
-        responseHeaders.append("Content-Type: ")
+        responseHeaders
+                .append(HTTP_VERSION)
+                .append(" ")
+                .append(statusCode)
+                .append(" ")
+                .append(STATUS_CODES.get(statusCode))
+                .append(CRLF);
+        responseHeaders
+                .append("Content-Type: ")
                 .append(CONTENT_TYPES.getOrDefault(contentType, CONTENT_TYPES.get("default")))
                 .append(CRLF);
-        responseHeaders.append("Content-Length: ").append(contentBytes.length).append(CRLF);
-        responseHeaders.append("Connection: close").append(CRLF);
-        responseHeaders.append(CRLF);
+        responseHeaders
+                .append("Content-Length: ")
+                .append(contentBytes.length)
+                .append(CRLF);
+        responseHeaders
+                .append("Connection: close")
+                .append(CRLF);
+        responseHeaders
+                .append(CRLF);
 
         outputStream.write(responseHeaders.toString().getBytes(StandardCharsets.UTF_8));
 
-        System.out.println(responseHeaders.toString());
+        System.out.println(responseHeaders);
 
         // Write body if not a HEAD request
         if (!isHead) {
@@ -92,18 +104,29 @@ public class ResponseBuilder {
     public void handleChunkedResponse(int statusCode, String contentType, byte[] contentBytes,
                                       OutputStream outputStream) throws IOException {
         StringBuilder responseHeaders = new StringBuilder();
-        responseHeaders.append(HTTP_VERSION).append(" ").append(statusCode).append(" ")
-                .append(STATUS_CODES.get(statusCode)).append(CRLF);
-        responseHeaders.append("Content-Type: ")
+        responseHeaders
+                .append(HTTP_VERSION)
+                .append(" ")
+                .append(statusCode)
+                .append(" ")
+                .append(STATUS_CODES.get(statusCode))
+                .append(CRLF);
+        responseHeaders
+                .append("Content-Type: ")
                 .append(CONTENT_TYPES.getOrDefault(contentType, CONTENT_TYPES.get("default")))
                 .append(CRLF);
-        responseHeaders.append("Transfer-Encoding: chunked").append(CRLF);
-        responseHeaders.append("Connection: close").append(CRLF);
-        responseHeaders.append(CRLF);
+        responseHeaders
+                .append("Transfer-Encoding: chunked")
+                .append(CRLF);
+        responseHeaders
+                .append("Connection: close")
+                .append(CRLF);
+        responseHeaders
+                .append(CRLF);
 
         outputStream.write(responseHeaders.toString().getBytes(StandardCharsets.UTF_8));
 
-        System.out.println(responseHeaders.toString());
+        System.out.println(responseHeaders);
 
         int index = 0;
         while (index < contentBytes.length) {

@@ -171,6 +171,8 @@ public class HTTPRequest {
      *
      * @param body a line of the request header
      */
+
+    //TODO - DO WE NEED EXCEPTION HERE ?
     private void parseBody(String body) throws Exception {
         String[] pairs = body.split("&");
         for (String pair : pairs) {
