@@ -59,3 +59,4 @@ nbdist/web/
 
 # macOS
 .DS_Store
+out
