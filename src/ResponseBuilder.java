@@ -28,7 +28,8 @@ public class ResponseBuilder {
             "html", "text/html",
             "image", "image",
             "icon", "icon",
-            "default", "application/octet-stream"
+            "default", "application/octet-stream",
+            "message/http", "message/http"
     );
 
     /**
@@ -47,6 +48,10 @@ public class ResponseBuilder {
      */
     public void handleResponse(int statusCode, String contentType, byte[] contentBytes,
                                String requestType, OutputStream outputStream, String request) throws IOException {
+        // if some fields are null, make them empty strings
+        requestType = requestType == null ? "" : requestType;
+        request = request == null ? "" : request;
+
         Boolean isHead = requestType.equals("HEAD");
         Boolean isTrace = requestType.equals("TRACE");
 

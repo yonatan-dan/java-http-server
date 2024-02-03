@@ -24,7 +24,7 @@ public class HTTPRequest {
     private Map<String, String> requestBody;
 
     /**
-     * Constructs an src.HTTPRequest object and parses the provided request header.
+     * Constructs a src.HTTPRequest object and parses the provided request header.
      *
      * @param requestHeader the HTTP request header to parse
      */
@@ -45,9 +45,8 @@ public class HTTPRequest {
             determineContentType();
             parseBody(body);
         } catch (Exception e) {
-            System.out.println("Error parsing request header: " + e.getMessage());
+            System.out.println("Error parsing request header, Returning 400 Bad Request");
             isValid = false;
-
         }
     }
 
@@ -58,6 +57,11 @@ public class HTTPRequest {
     private void determineContentType() {
         String[] parts = requestedPage.split("\\.");
         String extension = parts[parts.length - 1];
+
+        if (type.equals(RequestType.TRACE.toString())) {
+            contentType = "message/http";
+            return;
+        }
 
         for (String imageExtension : imageExtensions) {
             if (imageExtension.equals(extension)) {
@@ -85,16 +89,29 @@ public class HTTPRequest {
      * @param line a line of the request header
      */
     private void parseTypeAndRequestedPage(String line) {
-        if (line.startsWith("GET") || line.startsWith("POST") ||
-                line.startsWith("HEAD") || line.startsWith("TRACE")){
+        if (line.startsWith(RequestType.GET.toString()) ||
+                line.startsWith(RequestType.POST.toString()) ||
+                line.startsWith(RequestType.HEAD.toString()) ||
+                line.startsWith(RequestType.TRACE.toString()) ||
+                line.startsWith(RequestType.PUT.toString()) ||
+                line.startsWith(RequestType.DELETE.toString()) ||
+                line.startsWith(RequestType.OPTION.toString())) {
             String[] parts = line.split(" ");
-            if (parts.length >= 2) {
+            if (parts.length >= 3) {
                 type = parts[0];
                 requestedPage = parts[1];
+                // Check if HTTP version is present
+                if (!parts[2].startsWith("HTTP/")) {
+                    isValid = false;
+                    return;
+                }
+
                 parseParameters(requestedPage);
                 if (this.requestedPage.equals("/")) { // handle default page
                     requestedPage = "/index.html";
                 }
+            } else {
+                isValid = false;
             }
         }
     }
@@ -171,7 +188,7 @@ public class HTTPRequest {
      *
      * @param body a line of the request header
      */
-    private void parseBody(String body) throws Exception {
+    private void parseBody(String body) {
         String[] pairs = body.split("&");
         for (String pair : pairs) {
             String[] parts = pair.split("=");

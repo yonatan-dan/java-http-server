@@ -44,6 +44,7 @@ public class RequestHandler {
             httpRequest = readRequestAndCreateHttpRequestInstance(in);
 
             if (!httpRequest.isValid()) {  // handle invalid request
+
                 responseBuilder.handleResponse(
                         400, DEFAULT_CONTENT_TYPE, new byte[0], httpRequest.getType(), outputStream, requestHeaders
                 );
@@ -138,8 +139,16 @@ public class RequestHandler {
      */
     private HTTPRequest readRequestAndCreateHttpRequestInstance(BufferedReader in) throws IOException {
         StringBuilder requestBuilder = new StringBuilder();
-        String line;
-        while (!(line = in.readLine()).isEmpty()) {
+        String line = in.readLine();
+
+        // Check if null for when browser caches previous requests
+        if (line == null) {
+            return new HTTPRequest("", configReader.getImageExtensions(), "");
+        }
+
+        requestBuilder.append(line).append("\r\n");
+
+        while ((line = in.readLine()) != null && !line.isEmpty()) {
             requestBuilder.append(line).append("\r\n");
         }
 
@@ -152,7 +161,7 @@ public class RequestHandler {
         }
         String request = requestBuilder.toString();
         // print only rhe request header
-        this.requestHeaders = request.split("\r\n\r\n")[0];
+        this.requestHeaders = request.split("\r\n\r\n").length > 0 ? request.split("\r\n\r\n")[0] : "";
         String body = request.split("\r\n\r\n").length > 1 ? request.split("\r\n\r\n")[1] : "";
         System.out.println(this.requestHeaders);
         return new HTTPRequest(request, configReader.getImageExtensions(), body);
