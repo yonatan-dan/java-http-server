@@ -217,7 +217,7 @@ public class RequestHandler {
         String body = request
                 .split("\r\n\r\n").length > 1 ? request
                 .split("\r\n\r\n")[1] : "";
-        System.out.println(this.requestHeaders);
+        System.out.println(this.requestHeaders + "\n"); // print the request header
         return new HTTPRequest(request, configReader.getImageExtensions(), body);
     }
 

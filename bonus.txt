@@ -1,0 +1,3 @@
+Bonus Implementations:
+- [x] Added a `message/http` response content type for TRACE requests and logic to handle it.
+- [x] Added a `505` status code for HTTP version not supported and logic to handle it.

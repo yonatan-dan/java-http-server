@@ -21,7 +21,9 @@ Content Types:
 HTML: "content-type: text/html"
 Image files: "content-type: image"
 Icons: "content-type: icon"
+Trace: "content-type: message/http"
 Other: "content-type: application/octet-stream"
+
 Supported Image Files:
 
 .bmp, .gif, .png, .jpg
@@ -66,6 +68,16 @@ config.ini: Configuration file for the server.
 compile.sh: Bash script to compile the code.
 run.sh: Bash script to run the server.
 server-root: Root directory for the web server.
+
+Implementation Details:
+Server: This class is responsible for starting the server, listening for incoming connections, and spawning new threads to handle each connection.
+RequestHandler: This class is responsible for handling each individual client request. It parses the HTTP request, processes it, and sends back an appropriate HTTP response.
+HTTPRequest: This class represents an HTTP request. It parses the request line, headers, and body (if any) from the input stream and provides methods to access the request's properties.
+ResponseBuilder: This class is responsible for building an HTTP response based on the request and the server's configuration.
+
+Server Design:
+The server is designed around a multi-threaded model, where each client connection is handled by a separate thread. This design allows the server to handle multiple simultaneous connections without blocking, improving the server's performance and responsiveness. The server uses a thread pool to manage these threads, limiting the number of concurrent threads to a maximum specified in the configuration file. This prevents resource exhaustion under heavy load. The server also uses a semaphore to control access to the thread pool, ensuring that if the maximum number of threads is reached, additional connections are queued and handled only after one of the initial connections has been closed. This design ensures that the server remains responsive and efficient under a variety of load conditions. The server is also designed to be robust and fault-tolerant, with exception handling mechanisms in place to ensure that the server continues to run even if an error occurs while processing a request.
+
 Contributors
 Yonatan Dan
 Maya Levi
