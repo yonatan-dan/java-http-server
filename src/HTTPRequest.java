@@ -19,6 +19,7 @@ public class HTTPRequest {
     private String userAgent;
     private boolean chunked;
     private boolean isValid;
+    private boolean unsupportedHttpVersion = false;
     private int contentLength;
     private Map<String, String> parameters;
     private Map<String, String> requestBody;
@@ -34,6 +35,7 @@ public class HTTPRequest {
         String[] lines = requestHeader.split("\n");
         imageExtensions = imgExtensions;
         isValid = true; // assume the request is valid until proven otherwise
+        unsupportedHttpVersion = false;
         try {
             for (String line : lines) {
                 parseTypeAndRequestedPage(line);
@@ -103,6 +105,16 @@ public class HTTPRequest {
                 // Check if HTTP version is present
                 if (!parts[2].startsWith("HTTP/")) {
                     isValid = false;
+                    return;
+                }
+
+                // Check if HTTP version is supported
+                if (!parts[2].startsWith(HTTPVersion.HTTP_1_0.getVersion()) &&
+                        !parts[2].startsWith(HTTPVersion.HTTP_1_1.getVersion()) &&
+                        !parts[2].startsWith(HTTPVersion.HTTP_0_9.getVersion()) &&
+                        !parts[2].startsWith(HTTPVersion.HTTP_2_0.getVersion()) &&
+                        !parts[2].startsWith(HTTPVersion.HTTP_3_0.getVersion())) {
+                    unsupportedHttpVersion = true;
                     return;
                 }
 
@@ -284,5 +296,13 @@ public class HTTPRequest {
      */
     public Map<String, String> getRequestFormBody() {
         return requestBody;
+    }
+
+    /**
+     * Returns whether the HTTP version is unsupported.
+     * @return whether the HTTP version is unsupported
+     */
+    public boolean isUnsupportedHttpVersion() {
+        return unsupportedHttpVersion;
     }
 }

@@ -46,7 +46,25 @@ public class RequestHandler {
             if (!httpRequest.isValid()) {  // handle invalid request
 
                 responseBuilder.handleResponse(
-                        400, DEFAULT_CONTENT_TYPE, new byte[0], httpRequest.getType(), outputStream, requestHeaders
+                        400,
+                        DEFAULT_CONTENT_TYPE,
+                        new byte[0],
+                        httpRequest.getType(),
+                        outputStream,
+                        requestHeaders
+                );
+                return;
+            }
+
+            // handle unsupported HTTP version
+            if (httpRequest.isUnsupportedHttpVersion()) {
+                responseBuilder.handleResponse(
+                        505,
+                        DEFAULT_CONTENT_TYPE,
+                        new byte[0],
+                        httpRequest.getType(),
+                        outputStream,
+                        requestHeaders
                 );
                 return;
             }
@@ -55,7 +73,12 @@ public class RequestHandler {
             if (!method.equals(HTTP_GET) && !method.equals(HTTP_POST) &&
                     !method.equals(HTTP_HEAD) && !method.equals(HTTP_TRACE)) { // handle not implemented request
                 responseBuilder.handleResponse(
-                        501, DEFAULT_CONTENT_TYPE, new byte[0], httpRequest.getType(), outputStream, requestHeaders
+                        501,
+                        DEFAULT_CONTENT_TYPE,
+                        new byte[0],
+                        httpRequest.getType(),
+                        outputStream,
+                        requestHeaders
                 );
                 return;
             }
@@ -63,7 +86,12 @@ public class RequestHandler {
             if (method.equals(HTTP_POST) && httpRequest.getRequestedPage().equals("/params_info.html")) { // handle params_info.html POST request
                 String content = handleParamsInfoPostRequest();
                 responseBuilder.handleResponse(
-                        200, httpRequest.getContentType(), content.getBytes(), httpRequest.getType(), outputStream, requestHeaders
+                        200,
+                        httpRequest.getContentType(),
+                        content.getBytes(),
+                        httpRequest.getType(),
+                        outputStream,
+                        requestHeaders
                 );
                 return;
             }
@@ -71,7 +99,12 @@ public class RequestHandler {
             String filePath = configReader.getRootDirectory() + sanitizePath(httpRequest.getRequestedPage());
             if (!Files.exists(Paths.get(filePath))) { // handle not found request
                 responseBuilder.handleResponse(
-                        404, DEFAULT_CONTENT_TYPE, new byte[0], httpRequest.getType(), outputStream, requestHeaders
+                        404,
+                        DEFAULT_CONTENT_TYPE,
+                        new byte[0],
+                        httpRequest.getType(),
+                        outputStream,
+                        requestHeaders
                 );
                 return;
             }
@@ -79,11 +112,19 @@ public class RequestHandler {
             byte[] fileContent = readFileContent(filePath);
             if (httpRequest.isChunked()) { // handle chunked response
                 responseBuilder.handleChunkedResponse(
-                        200, httpRequest.getContentType(), fileContent, outputStream
+                        200,
+                        httpRequest.getContentType(),
+                        fileContent,
+                        outputStream
                 );
             } else { // handle normal response
                 responseBuilder.handleResponse(
-                        200, httpRequest.getContentType(), fileContent, httpRequest.getType(), outputStream, requestHeaders
+                        200,
+                        httpRequest.getContentType(),
+                        fileContent,
+                        httpRequest.getType(),
+                        outputStream,
+                        requestHeaders
                 );
             }
         } catch (Exception e) {
@@ -91,7 +132,12 @@ public class RequestHandler {
             try {
                 PrintWriter out = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
                 responseBuilder.handleResponse(
-                        500, DEFAULT_CONTENT_TYPE, new byte[0], httpRequest.getType(), clientSocket.getOutputStream(), requestHeaders
+                        500,
+                        DEFAULT_CONTENT_TYPE,
+                        new byte[0],
+                        httpRequest.getType(),
+                        clientSocket.getOutputStream(),
+                        requestHeaders
                 );
                 out.flush();
             } catch (IOException ioException) {
@@ -146,10 +192,14 @@ public class RequestHandler {
             return new HTTPRequest("", configReader.getImageExtensions(), "");
         }
 
-        requestBuilder.append(line).append("\r\n");
+        requestBuilder
+                .append(line)
+                .append("\r\n");
 
         while ((line = in.readLine()) != null && !line.isEmpty()) {
-            requestBuilder.append(line).append("\r\n");
+            requestBuilder
+                    .append(line)
+                    .append("\r\n");
         }
 
         // add the body of the request
@@ -161,8 +211,12 @@ public class RequestHandler {
         }
         String request = requestBuilder.toString();
         // print only rhe request header
-        this.requestHeaders = request.split("\r\n\r\n").length > 0 ? request.split("\r\n\r\n")[0] : "";
-        String body = request.split("\r\n\r\n").length > 1 ? request.split("\r\n\r\n")[1] : "";
+        this.requestHeaders = request
+                .split("\r\n\r\n").length > 0 ? request
+                .split("\r\n\r\n")[0] : "";
+        String body = request
+                .split("\r\n\r\n").length > 1 ? request
+                .split("\r\n\r\n")[1] : "";
         System.out.println(this.requestHeaders);
         return new HTTPRequest(request, configReader.getImageExtensions(), body);
     }
@@ -176,7 +230,11 @@ public class RequestHandler {
 
         StringBuilder content = new StringBuilder("<html><body>");
         for (Map.Entry<String, String> entry : params.entrySet()) {
-            content.append("<p>").append(entry.getKey()).append(": ").append(entry.getValue()).append("</p>");
+            content.append("<p>")
+                    .append(entry.getKey())
+                    .append(": ")
+                    .append(entry.getValue())
+                    .append("</p>");
         }
         content.append("</body></html>");
         return content.toString();
