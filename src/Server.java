@@ -69,6 +69,8 @@ public class Server {
                 System.out.println("Thread interrupted: " + e);
             } catch (IOException e) {
                 System.out.println("failed to starts the server and listening for incoming client connections : " + e);
+            } catch (Exception e) {
+                System.out.println("Error handling request: " + e);
             }
         }
     }
