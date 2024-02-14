@@ -2,6 +2,8 @@ package src;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -108,7 +110,7 @@ public class HTTPRequest {
             String[] parts = line.split(" ");
             if (parts.length >= 3) {
                 type = parts[0];
-                requestedPage = parts[1];
+                requestedPage = sanitizePath(parts[1]);
                 // Check if HTTP version is present
                 if (!parts[2].startsWith("HTTP/")) {
                     isValid = false;
@@ -126,6 +128,8 @@ public class HTTPRequest {
                 }
 
                 parseParameters(requestedPage);
+                // normalize the requested path to handle default page
+
                 if (this.requestedPage.equals("/")) { // handle default page
                     requestedPage = "/index.html";
                 }
@@ -214,6 +218,21 @@ public class HTTPRequest {
             String name = parts[0];
             String value = parts.length > 1 ? URLDecoder.decode(parts[1], StandardCharsets.UTF_8) : "";
             requestBody.put(name, value);
+        }
+    }
+
+    /**
+     * Sanitizes the path of the requested page.
+     * Removes all redundant characters from the path.
+     *
+     * @param path the path of the requested page
+     * @return the sanitized path
+     */
+    private String sanitizePath(String path) {
+        try {
+            return Paths.get(path).normalize().toString();
+        } catch (InvalidPathException e) {
+            return "";
         }
     }
 
