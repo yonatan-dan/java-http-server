@@ -188,7 +188,7 @@ public class RequestHandler {
         String line = in.readLine();
 
         // check if null for when browser caches previous requests
-        if (line == null) {
+        if (line == null || line.isEmpty()) {
             return new HTTPRequest("", configReader.getImageExtensions(), "");
         }
 
@@ -210,7 +210,7 @@ public class RequestHandler {
             }
         }
         String request = requestBuilder.toString();
-        // print only rhe request header
+        // print only the request header
         this.requestHeaders = request
                 .split("\r\n\r\n").length > 0 ? request
                 .split("\r\n\r\n")[0] : "";

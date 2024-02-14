@@ -36,6 +36,13 @@ public class HTTPRequest {
         imageExtensions = imgExtensions;
         isValid = true; // assume the request is valid until proven otherwise
         unsupportedHttpVersion = false;
+
+        if (requestHeader.isEmpty() || lines.length == 0) { // handle empty request
+            System.out.println("Empty request, Returning 400 Bad Request");
+            isValid = false;
+            return;
+        }
+
         try {
             for (String line : lines) {
                 parseTypeAndRequestedPage(line);
