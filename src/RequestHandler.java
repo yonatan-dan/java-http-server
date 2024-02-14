@@ -187,7 +187,7 @@ public class RequestHandler {
         StringBuilder requestBuilder = new StringBuilder();
         String line = in.readLine();
 
-        // Check if null for when browser caches previous requests
+        // check if null for when browser caches previous requests
         if (line == null) {
             return new HTTPRequest("", configReader.getImageExtensions(), "");
         }
@@ -225,18 +225,33 @@ public class RequestHandler {
      * Handles a POST request to the /params_info.html page.
      * @return the content of the response
      */
-    private String handleParamsInfoPostRequest() {
+    private String handleParamsInfoPostRequest() throws IOException {
         Map<String, String> params = httpRequest.getRequestFormBody();
 
-        StringBuilder content = new StringBuilder("<html><body>");
-        for (Map.Entry<String, String> entry : params.entrySet()) {
-            content.append("<p>")
-                    .append(entry.getKey())
-                    .append(": ")
-                    .append(entry.getValue())
-                    .append("</p>");
+        // read the params_info.html file into a string
+        StringBuilder html = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(
+                new FileReader(
+                        configReader.getRootDirectory() + "/params_info.html"
+                )
+        )) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                html.append(line)
+                    .append("\n");
+            }
         }
-        content.append("</body></html>");
-        return content.toString();
+
+        // find the <body> tag in the string (we assume it exists)
+        int bodyIndex = html.indexOf("<body>");
+        bodyIndex += "<body>".length(); // move the index to the end of the <body> tag
+
+        for (Map.Entry<String, String> entry : params.entrySet()) {
+            String pElement = "<p>" + entry.getKey() + ": " + entry.getValue() + "</p>\n";
+            html.insert(bodyIndex, pElement);
+            bodyIndex += pElement.length();
+        }
+
+        return html.toString();
     }
 }
